@@ -5,6 +5,7 @@ Requirements
   http://www.openmicroscopy.org/site/support/omero4/developers/Python.html
 * Python packages: PIL
 * ffmpeg with libx264 support (configure --enable-libx264)
+* qt-faststart from libav-tools
 
 Usage
 =====
