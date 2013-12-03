@@ -3,7 +3,6 @@ import os
 import errno
 import getpass
 from omero.gateway import BlitzGateway
-from PIL import Image
 
 
 def makedirs_exist_ok(name):
