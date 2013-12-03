@@ -17,6 +17,7 @@ HOST = 'lincs-omero.hms.harvard.edu'
 PORT = 4064
 
 # Read username and password.
+print "Connecting to OMERO server: %s:%d" % (HOST, PORT)
 username = getpass._raw_input('Username: ')
 password = getpass.getpass()
 
@@ -24,9 +25,11 @@ password = getpass.getpass()
 conn = BlitzGateway(username, password, host=HOST, port=PORT)
 connected = conn.connect()
 if not connected:
-    sys.stderr.write("Error: Connection not available, please check your user "
-                     "name and password.\n")
+    print >> sys.stderr, ("Error: Connection not available, please check your "
+                          "username and password.")
     sys.exit(1)
+else:
+    print "Login successful.\n"
 
 # Get plate of interest.
 # (ID 1552 is "RTK ligands induce differing FOXO3a translocation dynamics")
