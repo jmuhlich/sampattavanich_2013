@@ -23,7 +23,7 @@ processed_frame_subdir = 'processed'
 temp_movie_filename = 'output-temp.mp4'
 output_movie_filename = 'output.mp4'
 
-font = ImageFont.truetype('LiberationSans-Regular.ttf', 30)
+font = ImageFont.truetype('LiberationSans-Regular.ttf', 24)
 
 render_command_template = (
     'ffmpeg -i %s/%%03d.jpg '
