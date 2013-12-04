@@ -34,6 +34,8 @@ else:
     print "Login successful.\n"
 
 # Set our default group so we can see the data.
+# (I thought I had to do this, but now I am not sure it's needed.
+# -JLM 2013/12/04)
 try:
     group = next(g for g in conn.listGroups() if g.getName() == GROUP)
 except StopIteration:
