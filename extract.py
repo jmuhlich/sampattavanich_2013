@@ -2,6 +2,7 @@ import sys
 import os
 import errno
 import getpass
+import pickle
 from omero.gateway import BlitzGateway
 
 
@@ -60,12 +61,12 @@ for (row_num, row) in enumerate(well_grid):
         image.setColorRenderingModel()
         image.setActiveChannels([1], colors=['FF0'])
         # Loop over each frame in the movie.
-        for t in xrange(0, size_t):
+        for frame in xrange(0, size_t):
             # Print progress for this well, overwriting the same line each time.
-            print "\r%s - %s  %d/%d" % (output_dir, name, t+1, size_t),
+            print "\r%s - %s  %d/%d" % (output_dir, name, frame+1, size_t),
             sys.stdout.flush()
             # Construct output filename for this frame.
-            filename = os.path.join(full_output_dir, '%03d.jpg' % t)
+            filename = os.path.join(full_output_dir, '%03d.jpg' % frame)
             # Skip the render + export process if the file already exists.
             if not os.path.exists(filename):
                 try:
@@ -75,7 +76,8 @@ for (row_num, row) in enumerate(well_grid):
                         # point is pretty quick.
                         #
                         # Use full quality (compression=1.0).
-                        jpeg_data = image.renderJpeg(z=0, t=t, compression=1.0)
+                        jpeg_data = image.renderJpeg(z=0, t=frame,
+                                                     compression=1.0)
                         # Write the data out to the file.
                         fd.write(jpeg_data)
                 except KeyboardInterrupt as e:
@@ -88,6 +90,14 @@ for (row_num, row) in enumerate(well_grid):
                         pass
                     # Re-raise the KeyboardInterrupt so the process does exit.
                     raise e
+        # Get real-time offset in seconds for each movie frame.
+        delta_t = [pi.deltaT for pi in
+                   image.getPrimaryPixels().copyPlaneInfo(theC=0, theZ=0)]
+        # Write it to disk.
+        dt_filename = os.path.join(full_output_dir, 'delta_t.pck')
+        with open(dt_filename, 'wb') as fd:
+            pickle.dump(delta_t, fd, protocol=2)
+
         # Print a newline here (since the progress output doesn't).
         print
 
