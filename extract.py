@@ -15,6 +15,7 @@ def makedirs_exist_ok(name):
 
 HOST = 'lincs-omero.hms.harvard.edu'
 PORT = 4064
+GROUP = 'Public'
 
 # Read username and password.
 print "Connecting to OMERO server: %s:%d" % (HOST, PORT)
@@ -30,6 +31,13 @@ if not connected:
     sys.exit(1)
 else:
     print "Login successful.\n"
+
+# Set our default group so we can see the data.
+try:
+    group = next(g for g in conn.listGroups() if g.getName() == GROUP)
+except StopIteration:
+    print >> sys.stderr, "Error: could not find group '%s'" % GROUP
+conn.setGroupForSession(group.getId())
 
 # Get plate of interest.
 # (ID 1552 is "RTK ligands induce differing FOXO3a translocation dynamics")
