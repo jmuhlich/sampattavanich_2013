@@ -25,7 +25,7 @@ font = ImageFont.truetype('LiberationSans-Regular.ttf', 24)
 
 render_command_template = (
     'ffmpeg -i %s/%%03d.jpg '
-    '-y -vcodec libx264 -pix_fmt yuv420p -crf 24 -an '
+    '-y -vcodec libx264 -pix_fmt yuv420p -crf 22 -an '
     '%s'
     )
 faststart_command_template ='qt-faststart %s %s'
