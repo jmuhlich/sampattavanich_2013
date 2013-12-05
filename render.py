@@ -21,7 +21,7 @@ SCALE_BAR_HEIGHT_PIXELS = 3
 MICRONS_PER_PIXEL = 0.6450
 
 # Limit workers since this is more disk I/O limited.
-NUM_WORKERS = 4
+MAX_PROCESSES = 4
 
 input_base = 'frames'
 output_subdir = 'render'
@@ -40,7 +40,8 @@ faststart_command_template ='qt-faststart %s %s'
 
 def main(argv):
     global pool, well_dirs, map_args, result
-    pool = multiprocessing.Pool(processes=NUM_WORKERS)
+    processes = min(multiprocessing.cpu_count(), MAX_PROCESSES)
+    pool = multiprocessing.Pool(processes)
     manager = multiprocessing.Manager()
     queue = manager.Queue()
     well_dirs = os.listdir(input_base)
