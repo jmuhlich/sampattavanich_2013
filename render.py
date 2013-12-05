@@ -43,7 +43,7 @@ def main(argv):
     pool = multiprocessing.Pool(processes=NUM_WORKERS)
     manager = multiprocessing.Manager()
     queue = manager.Queue()
-    well_dirs = sorted(os.listdir(input_base))
+    well_dirs = os.listdir(input_base)
     map_args = itertools.product(well_dirs, [queue])
     result = pool.map_async(render_well_worker, map_args)
     num_complete = 0
@@ -56,6 +56,7 @@ def main(argv):
                 pct_complete = num_complete * 100 / len(well_dirs)
                 print '\n=== TOTAL: %d/%d (%d%%) completed ===\n' % \
                     (num_complete, len(well_dirs), pct_complete)
+            sys.stdout.flush()
         except Queue.Empty:
             pass
         except KeyboardInterrupt:
@@ -84,7 +85,6 @@ def render_well_worker(args):
     for frame, filename in enumerate(sorted(jpg_filenames)):
         if frame % (num_files / 10) == 0:
             log('image processing - %d%%' % (frame * 100 / num_files))
-        sys.stdout.flush()
         image_in = Image.open(os.path.join(input_path, filename))
         (w, h) = image_in.size
         crop_box = (w/2-CROP_2, h/2-CROP_2, w/2+CROP_2, h/2+CROP_2)
