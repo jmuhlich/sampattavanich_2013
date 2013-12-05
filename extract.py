@@ -49,10 +49,14 @@ plate = conn.getObject('Plate', 1552)
 well_grid = plate.getWellGrid()
 
 # Loop over all wells in the plate.
-for (row_num, row) in enumerate(well_grid):
-    for (col_num, well) in enumerate(row):
-        # Construct paths and create output directory.
-        output_dir = 'r%02d_c%02d' % (row_num, col_num)
+for (raw_row_num, row) in enumerate(well_grid):
+    for (raw_col_num, well) in enumerate(row):
+        # Fix up row and column numbers to match Pat's nomenclature.
+        row_num = raw_row_num + 1
+        col_num = raw_col_num + 2
+        # Construct paths and create output directory. (I dislike this naming
+        # format but it's what Pat has chosen. -JLM)
+        output_dir = 'r%dc%d' % (row_num, col_num)
         full_output_dir = os.path.join('frames', output_dir)
         makedirs_exist_ok(full_output_dir)
         # Get image object and a few of its useful attributes.
