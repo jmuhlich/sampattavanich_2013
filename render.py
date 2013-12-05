@@ -13,6 +13,12 @@ from PIL import Image, ImageFont, ImageDraw
 CROP_SIZE = 700
 CROP_2 = CROP_SIZE / 2
 OUTPUT_DIMS = (480,) * 2
+SCALE_BAR_LENGTH_MICRONS = 50
+SCALE_BAR_HEIGHT_PIXELS = 3
+
+# Scale is hard-coded since metadata in OMERO is wrong (per discussion with Pat
+# on 2013/12/04).
+MICRONS_PER_PIXEL = 0.6450
 
 # Limit workers since this is more disk I/O limited.
 NUM_WORKERS = 4
@@ -20,7 +26,9 @@ NUM_WORKERS = 4
 input_base = 'frames'
 output_subdir = 'render'
 
-font = ImageFont.truetype('LiberationSans-Regular.ttf', 24)
+font_name = 'LiberationSans-Regular.ttf'
+font_timestamp = ImageFont.truetype(font_name, 24)
+font_scale = ImageFont.truetype(font_name, 18)
 
 render_command_template = (
     'ffmpeg -i %s/%%03d.jpg '
@@ -85,7 +93,19 @@ def render_well_worker(args):
         dt_minutes = delta_t[frame] / 60
         ts_hours, ts_minutes = divmod(dt_minutes, 60)
         timestamp_text = '%02d:%02d (t=%d)' % (ts_hours, ts_minutes, dt_minutes)
-        draw.text((10, 10), timestamp_text, font=font)
+        draw.text((10, 10), timestamp_text, font=font_timestamp)
+        scale_bar_length_pixels = SCALE_BAR_LENGTH_MICRONS / MICRONS_PER_PIXEL
+        scale_bar_coords = [(10, OUTPUT_DIMS[1]-10),
+                            (10 + scale_bar_length_pixels,
+                             OUTPUT_DIMS[1]-10-SCALE_BAR_HEIGHT_PIXELS)]
+        draw.rectangle(scale_bar_coords, fill='#ffffff')
+        scale_text = u"%d\xb5m" % SCALE_BAR_LENGTH_MICRONS
+        scale_text_dims = draw.textsize(scale_text, font=font_scale)
+        scale_text_left = (10 + scale_bar_length_pixels / 2 -
+                           scale_text_dims[0] / 2)
+        scale_text_top = (scale_bar_coords[1][1] - 5 -
+                          sum(font_scale.getmetrics()))
+        draw.text((scale_text_left, scale_text_top), scale_text, font=font_scale)
         output_frame_filename = os.path.join(output_path, filename)
         image_out.save(output_frame_filename, quality=95)
     log('image processing - 100%')
