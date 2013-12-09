@@ -25,10 +25,11 @@ MICRONS_PER_PIXEL = 0.6450
 # Limit workers since this is more disk I/O limited.
 MAX_PROCESSES = 4
 
-# Directory under which the data lives.
+# Input and output base directories.
 INPUT_BASE = 'frames'
-# Leaf directory (per-well) where we'll store our output.
-OUTPUT_SUBDIR = 'render'
+OUTPUT_BASE = 'movies'
+# Per-frame subdirectory name for post-processed frame output.
+PROCESSED_SUBDIR = 'processed'
 
 # Create font objects for text annotation).
 font_name = 'LiberationSans-Regular.ttf'
@@ -37,11 +38,22 @@ font_scale = ImageFont.truetype(font_name, 18)
 
 # String templates for external commands.
 render_command_template = 'ffmpeg -i %s/%%03d.jpg -y ' \
-    '-vcodec libx264 -pix_fmt yuv420p -crf 22 -an %s'
+    '-vcodec libx264 -pix_fmt yuv420p -crf 21 -an %s'
 faststart_command_template ='qt-faststart %s %s'
 
 
 def main(argv):
+    if len(argv) == 0:
+        process_all()
+    elif len(argv) == 1:
+        render_well(argv[0])
+    else:
+        print >> sys.stderr, "Usage: render.py [well_name]"
+    return 0
+
+
+"""Process all wells."""
+def process_all():
     # Get number of CPUs and cap it to MAX_PROCESSES.
     processes = min(multiprocessing.cpu_count(), MAX_PROCESSES)
     # Build the pool and some other related objects.
@@ -92,25 +104,27 @@ our own args tuple. This tuple must contain the following values:
 2. A Queue (i.e. a ManagedQueue) for sending messages to the supervisor.
 
 The "protocol" for messages to send through the queue is tuples containing 2
-values: The value of well_dir (as an identifier) and the message.
+values: The value of well_name (as an identifier) and the message.
 """
 def render_well_worker(args):
-    well_dir, queue = args
+    well_name, queue = args
 
     # Convenience log function. Uses queue protocol if queue is defined,
     # otherwise just prints the message.
     def log(*values):
         msg = ' '.join(map(str, values))
         if queue:
-            queue.put((well_dir, msg))
+            queue.put((well_name, msg))
         else:
             print msg
 
     log('>>> BEGIN')
-    # Build some path strings and make sure our output directory exists.
-    input_path = os.path.join(INPUT_BASE, well_dir)
-    output_path = os.path.join(input_path, OUTPUT_SUBDIR)
-    makedirs_exist_ok(output_path)
+    # Build some path strings.
+    input_path = os.path.join(INPUT_BASE, well_name)
+    processed_path = os.path.join(input_path, PROCESSED_SUBDIR)
+    # Create output directories.
+    makedirs_exist_ok(processed_path)
+    makedirs_exist_ok(OUTPUT_BASE)
     # Get list of JPEG frame images to process.
     jpg_filenames = [p for p in os.listdir(input_path) if p.endswith('.jpg')]
     num_files = len(jpg_filenames)
@@ -150,16 +164,16 @@ def render_well_worker(args):
                           sum(font_scale.getmetrics()))
         draw.text((scale_text_left, scale_text_top), scale_text, font=font_scale)
         # Save the processed frame image as a high-quality JPEG.
-        output_frame_filename = os.path.join(output_path, filename)
+        output_frame_filename = os.path.join(processed_path, filename)
         image_out.save(output_frame_filename, quality=95)
     log('image processing - 100%')
     log('rendering movie')
     # Generate some filenames for the movie rendering process.
-    temp_movie_filename = os.path.join(output_path, 'movie-temp.mp4')
-    output_movie_filename = os.path.join(output_path, 'movie.mp4')
+    temp_movie_filename = os.path.join(processed_path, 'movie-temp.mp4')
+    output_movie_filename = os.path.join(OUTPUT_BASE, '%s.mp4' % well_name)
     # Put the movie filenames into the command templates.
     render_command = (render_command_template %
-                      (output_path, temp_movie_filename)).split(' ')
+                      (processed_path, temp_movie_filename)).split(' ')
     faststart_command = (faststart_command_template %
                          (temp_movie_filename, output_movie_filename)).split(' ')
     # Call the commands, silencing all output (but raise an exception on error).
@@ -172,9 +186,9 @@ def render_well_worker(args):
     log('<<< END')
 
 
-"""Render a single well without worring about the queue/messaging logic."""
-def render_well(well_dir):
-    render_well_worker((well_dir, None))
+"""Render a single well outside the multiprocessing framework."""
+def render_well(well_name):
+    render_well_worker((well_name, None))
 
 
 """A version of os.makedirs that doesn't fail if the directory exists."""
