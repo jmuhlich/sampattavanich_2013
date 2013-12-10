@@ -8,6 +8,17 @@ PLATEMAP_FILENAME = (
     'SORGER PROJECTS/Publications/2013/Submissions/'
     'SampattavanichAndKramer_et_al-FOXO3a/websites/Platemap.xlsx')
 
+LIGAND_RENAMES = {
+    'None': '',
+    'IGF1': 'IGF',
+    }
+
+INHIBITOR_RENAMES = {
+    'None': '',
+    }
+
+LIGANDS = ['', 'IGF', 'HRG', 'HGF', 'EGF', 'FGF', 'BTC', 'EPR']
+
 
 def main(argv):
     return 0
@@ -22,14 +33,14 @@ def build_platemap(filename):
     # Extract row metadata.
     row_meta = dataframe_for_range(ws, 'D9:D16')
     row_meta.columns = pd.Index(['ligand'])
-    row_meta['ligand'].replace('None', '', inplace=True)
+    row_meta['ligand'].replace(LIGAND_RENAMES, inplace=True)
     row_meta.insert(0, 'plate_row', range(1, len(row_meta)+1))
 
     # Extract column metadata.
     col_meta = dataframe_for_range(ws, 'G4:R6').T
     col_meta.columns = pd.Index(['ligand_conc', 'inhibitor',
                                  'inhibitor_conc'])
-    col_meta['inhibitor'].replace('None', '', inplace=True)
+    col_meta['inhibitor'].replace(INHIBITOR_RENAMES, inplace=True)
     col_meta.insert(0, 'plate_col', range(1, len(col_meta)+1))
 
     # Add same-valued dummy columns so merge() will generate a full cartesian
