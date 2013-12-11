@@ -27,7 +27,7 @@ MAX_PROCESSES = 4
 
 # Input and output base directories.
 INPUT_BASE = 'frames'
-OUTPUT_BASE = 'movies'
+OUTPUT_BASE = 'output/movies'
 # Per-frame subdirectory name for post-processed frame output.
 PROCESSED_SUBDIR = 'processed'
 
