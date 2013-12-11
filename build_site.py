@@ -17,6 +17,8 @@ INHIBITOR_RENAMES = {
     'None': '',
     }
 
+FLOAT_COLUMNS = ['ligand_conc', 'inhibitor_conc']
+
 LIGANDS = ['', 'IGF', 'HRG', 'HGF', 'EGF', 'FGF', 'BTC', 'EPR']
 
 
@@ -41,6 +43,8 @@ def build_platemap(filename):
     col_meta.columns = pd.Index(['ligand_conc', 'inhibitor',
                                  'inhibitor_conc'])
     col_meta['inhibitor'].replace(INHIBITOR_RENAMES, inplace=True)
+    for name in FLOAT_COLUMNS:
+        col_meta[name] = col_meta[name].astype(float)
     col_meta.insert(0, 'plate_col', range(1, len(col_meta)+1))
 
     # Add same-valued dummy columns so merge() will generate a full cartesian
