@@ -1,6 +1,11 @@
 import sys
+import os
+import codecs
+import errno
+import shutil
 import pandas as pd
 import openpyxl
+import jinja2
 
 
 PLATEMAP_FILENAME = (
@@ -10,7 +15,7 @@ PLATEMAP_FILENAME = (
 
 LIGAND_RENAMES = {
     'None': '',
-    'IGF1': 'IGF',
+    'IGF': 'IGF1',
     }
 
 INHIBITOR_RENAMES = {
@@ -19,10 +24,34 @@ INHIBITOR_RENAMES = {
 
 FLOAT_COLUMNS = ['ligand_conc', 'inhibitor_conc']
 
-LIGANDS = ['', 'IGF', 'HRG', 'HGF', 'EGF', 'FGF', 'BTC', 'EPR']
+LIGAND_ORDER = ['IGF1', 'HRG', 'HGF', 'EGF', 'FGF', 'BTC', 'EPR']
 
 
 def main(argv):
+    platemap = build_platemap(PLATEMAP_FILENAME)
+    rc_address = []
+    for row, ligand_conc in enumerate(sorted(platemap.ligand_conc.unique())):
+        rc_address_row = []
+        for col, ligand in enumerate(LIGAND_ORDER):
+            location = ((platemap.ligand_conc == ligand_conc) &
+                        (platemap.ligand == ligand))
+            address = platemap[location].rc_address.iat[0]
+            rc_address_row.append(address)
+        rc_address.append(rc_address_row)
+            
+    template_env = jinja2.Environment(
+        loader=jinja2.FileSystemLoader('templates')
+        )
+    template = template_env.get_template('table.html')
+    data = {'rc_address': rc_address}
+    content = template.render(data)
+
+    makedirs_exist_ok('output')
+    shutil.copy('static/style.css', 'output')
+    with codecs.open('output/table.html', 'w', 'utf-8') as out_file:
+        out_file.write(content)
+        
+
     return 0
 
 
@@ -58,9 +87,16 @@ def build_platemap(filename):
     new_column_order = platemap.columns[[0,2,1]].append(platemap.columns[3:])
     platemap = platemap[new_column_order]
 
-    # Synthesize a new column in r1c1 format.
-    rc_values = platemap.apply(lambda r: 'r%(plate_row)dc%(plate_col)d' % r, axis=1)
-    platemap.insert(2, 'rc_address', rc_values)
+    # Get rid of extreme left/right/bottom cells -- not part of the experiment.
+    platemap = platemap[(platemap.plate_col >= 2) &
+                        (platemap.plate_col <= 11) &
+                        (platemap.plate_row <= 7)]
+
+    # Replace plate_row and plate_col with a new column in r1c1 format.
+    rc_values = platemap.apply(lambda r: 'r%(plate_row)dc%(plate_col)d' % r,
+                               axis=1)
+    platemap = platemap.drop(['plate_row', 'plate_col'], axis=1)
+    platemap.insert(0, 'rc_address', rc_values)
 
     return platemap
 
@@ -69,6 +105,14 @@ def build_platemap(filename):
 def dataframe_for_range(worksheet, range):
     data = [[c.value for c in row] for row in worksheet.range(range)]
     return pd.DataFrame(data)
+
+
+def makedirs_exist_ok(name):
+    try:
+        os.makedirs(name)
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise
 
 
 if __name__ == '__main__':
