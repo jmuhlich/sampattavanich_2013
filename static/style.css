@@ -1,7 +1,5 @@
 .lookup-table-popup {
   display: none;
-  background: white;
-  /*width: 1130px;*/
 }
 
 /* hack around html5media-created display:block span so video player doesn't
@@ -12,9 +10,20 @@ wrap onto the next line */
 
 /* Override some jquery theme items. */
 
+.ui-widget {
+  font-family: inherit;
+}
+
 .ui-dialog .ui-dialog-titlebar {
   padding: 0 0.4em;
-  font-family: inherit;
+}
+
+.ui-dialog .ui-dialog-titlebar-close {
+  right: 0.1em;
+}
+
+.ui-dialog .ui-widget-content {
+  padding: 0.2em 0 0;
 }
 
 .ui-dialog {
