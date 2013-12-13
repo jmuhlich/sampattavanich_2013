@@ -4,6 +4,7 @@ import codecs
 import errno
 import shutil
 import stat
+import argparse
 import pandas as pd
 import openpyxl
 import jinja2
@@ -36,6 +37,11 @@ LIGAND_ORDER = ['IGF1', 'HRG', 'HGF', 'EGF', 'FGF', 'BTC', 'EPR']
 
 
 def main(argv):
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument( '-m', '--minimal', action='store_true',
+                           help="minimal mode (don't copy media files)")
+    args = argparser.parse_args()
+
     platemap = build_platemap(PLATEMAP_FILENAME)
     ligand_concs = [c for c in sorted(platemap.ligand_conc.unique()) if c > 0]
     rc_address = []
@@ -64,24 +70,25 @@ def main(argv):
     shutil.copy('static/style.css', 'output')
     shutil.copy('static/main.js', 'output')
 
-    makedirs_exist_ok('output/img/cell')
-    for src_filename in os.listdir(CELL_IMAGE_PATH):
-        if not src_filename.endswith('.png'):
-            continue
-        src_path = os.path.join(CELL_IMAGE_PATH, src_filename)
-        dest_filename = src_filename.partition(CELL_IMAGE_PREFIX)[2]
-        dest_path = os.path.join('output', 'img', 'cell', dest_filename)
-        shutil.copy(src_path, dest_path)
-        os.chmod(dest_path, 0644)
-    makedirs_exist_ok('output/img/popup')
-    for src_filename in os.listdir(POPUP_IMAGE_PATH):
-        if not src_filename.endswith('.png'):
-            continue
-        src_path = os.path.join(POPUP_IMAGE_PATH, src_filename)
-        dest_filename = src_filename
-        dest_path = os.path.join('output', 'img', 'popup', dest_filename)
-        shutil.copy(src_path, dest_path)
-        os.chmod(dest_path, 0644)
+    if not args.minimal:
+        makedirs_exist_ok('output/img/cell')
+        for src_filename in os.listdir(CELL_IMAGE_PATH):
+            if not src_filename.endswith('.png'):
+                continue
+            src_path = os.path.join(CELL_IMAGE_PATH, src_filename)
+            dest_filename = src_filename.partition(CELL_IMAGE_PREFIX)[2]
+            dest_path = os.path.join('output', 'img', 'cell', dest_filename)
+            shutil.copy(src_path, dest_path)
+            os.chmod(dest_path, 0644)
+        makedirs_exist_ok('output/img/popup')
+        for src_filename in os.listdir(POPUP_IMAGE_PATH):
+            if not src_filename.endswith('.png'):
+                continue
+            src_path = os.path.join(POPUP_IMAGE_PATH, src_filename)
+            dest_filename = src_filename
+            dest_path = os.path.join('output', 'img', 'popup', dest_filename)
+            shutil.copy(src_path, dest_path)
+            os.chmod(dest_path, 0644)
 
     return 0
 
