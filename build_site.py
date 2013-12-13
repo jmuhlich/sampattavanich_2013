@@ -34,6 +34,7 @@ INHIBITOR_RENAMES = {
 FLOAT_COLUMNS = ['ligand_conc', 'inhibitor_conc']
 
 LIGAND_ORDER = ['IGF1', 'HRG', 'HGF', 'EGF', 'FGF', 'BTC', 'EPR']
+INHIBITOR_ORDER = ['MEKi', 'AKTi', 'PI3Ki']
 
 
 def main(argv):
@@ -49,10 +50,22 @@ def main(argv):
         rc_address_row = []
         for col, ligand in enumerate(LIGAND_ORDER):
             location = ((platemap.ligand_conc == ligand_conc) &
-                        (platemap.ligand == ligand))
+                        (platemap.ligand == ligand) &
+                        (platemap.inhibitor == ''))
             address = platemap[location].rc_address.iat[0]
             rc_address_row.append(address)
         rc_address.append(rc_address_row)
+    # FIXME We should really just build a pivoted dataframe in the right way so
+    # that we can just iterate over it cleanly. This duplication is not good.
+    rc_address_inhibitors = []
+    for row, inhibitor in enumerate(INHIBITOR_ORDER):
+        rc_address_row = []
+        for col, ligand in enumerate(LIGAND_ORDER):
+            location = ((platemap.inhibitor == inhibitor) &
+                        (platemap.ligand == ligand))
+            address = platemap[location].rc_address.iat[0]
+            rc_address_row.append(address)
+        rc_address_inhibitors.append(rc_address_row)
             
     template_env = jinja2.Environment(
         loader=jinja2.FileSystemLoader('templates')
@@ -60,7 +73,9 @@ def main(argv):
     template = template_env.get_template('table.html')
     data = {'ligands': LIGAND_ORDER,
             'ligand_concs': ligand_concs,
+            'inhibitors': INHIBITOR_ORDER,
             'rc_address': rc_address,
+            'rc_address_inhibitors': rc_address_inhibitors,
             }
     content = template.render(data)
 

@@ -17,9 +17,22 @@
     {% endfor %}
     </tr>
   {% endfor %}
+  {% for row in rc_address_inhibitors %}
+    <tr>
+      <th>{{ ligand_concs[-1] }} ng/mL +  {{ inhibitors[loop.index0] }}</th>
+    {% for address in row %}
+      {% include "table_cell.html" %}
+    {% endfor %}
+    </tr>
+  {% endfor %}
 </table>
 
 {% for row in rc_address %}
+  {% for address in row %}
+    {% include "popup.html" %}
+  {% endfor %}
+{% endfor %}
+{% for row in rc_address_inhibitors %}
   {% for address in row %}
     {% include "popup.html" %}
   {% endfor %}
