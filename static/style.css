@@ -1,0 +1,22 @@
+.lookup-table-popup {
+  display: none;
+  background: white;
+  /*width: 1130px;*/
+}
+
+/* hack around html5media-created display:block span so video player doesn't
+wrap onto the next line */
+.lookup-table-popup > span {
+  display: inline-block !important;
+}
+
+/* Override some jquery theme items. */
+
+.ui-dialog .ui-dialog-titlebar {
+  padding: 0 0.4em;
+  font-family: inherit;
+}
+
+.ui-dialog {
+  box-shadow: 10px 10px 10px rgba(0,0,0,0.7)
+}

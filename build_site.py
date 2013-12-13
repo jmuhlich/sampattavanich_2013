@@ -3,15 +3,23 @@ import os
 import codecs
 import errno
 import shutil
+import stat
 import pandas as pd
 import openpyxl
 import jinja2
 
 
-PLATEMAP_FILENAME = (
+RESOURCE_PATH = (
     '/home/jmuhlich/Volumes/sysbio on research.files.med.harvard.edu/'
     'SORGER PROJECTS/Publications/2013/Submissions/'
-    'SampattavanichAndKramer_et_al-FOXO3a/websites/Platemap.xlsx')
+    'SampattavanichAndKramer_et_al-FOXO3a/websites'
+    )
+
+PLATEMAP_FILENAME = os.path.join(RESOURCE_PATH, 'Platemap.xlsx')
+CELL_IMAGE_PATH = os.path.join(RESOURCE_PATH,
+                               'PNG_individual_timeSeries_short_noTickLabel')
+CELL_IMAGE_PREFIX = 'Individual_nolabel_'
+POPUP_IMAGE_PATH = os.path.join(RESOURCE_PATH, 'PNG_individual_wellAveraged')
 
 LIGAND_RENAMES = {
     'None': '',
@@ -29,8 +37,9 @@ LIGAND_ORDER = ['IGF1', 'HRG', 'HGF', 'EGF', 'FGF', 'BTC', 'EPR']
 
 def main(argv):
     platemap = build_platemap(PLATEMAP_FILENAME)
+    ligand_concs = [c for c in sorted(platemap.ligand_conc.unique()) if c > 0]
     rc_address = []
-    for row, ligand_conc in enumerate(sorted(platemap.ligand_conc.unique())):
+    for row, ligand_conc in enumerate(ligand_concs):
         rc_address_row = []
         for col, ligand in enumerate(LIGAND_ORDER):
             location = ((platemap.ligand_conc == ligand_conc) &
@@ -43,14 +52,36 @@ def main(argv):
         loader=jinja2.FileSystemLoader('templates')
         )
     template = template_env.get_template('table.html')
-    data = {'rc_address': rc_address}
+    data = {'ligands': LIGAND_ORDER,
+            'ligand_concs': ligand_concs,
+            'rc_address': rc_address,
+            }
     content = template.render(data)
 
     makedirs_exist_ok('output')
-    shutil.copy('static/style.css', 'output')
     with codecs.open('output/table.html', 'w', 'utf-8') as out_file:
         out_file.write(content)
-        
+    shutil.copy('static/style.css', 'output')
+    shutil.copy('static/main.js', 'output')
+
+    makedirs_exist_ok('output/img/cell')
+    for src_filename in os.listdir(CELL_IMAGE_PATH):
+        if not src_filename.endswith('.png'):
+            continue
+        src_path = os.path.join(CELL_IMAGE_PATH, src_filename)
+        dest_filename = src_filename.partition(CELL_IMAGE_PREFIX)[2]
+        dest_path = os.path.join('output', 'img', 'cell', dest_filename)
+        shutil.copy(src_path, dest_path)
+        os.chmod(dest_path, 0644)
+    makedirs_exist_ok('output/img/popup')
+    for src_filename in os.listdir(POPUP_IMAGE_PATH):
+        if not src_filename.endswith('.png'):
+            continue
+        src_path = os.path.join(POPUP_IMAGE_PATH, src_filename)
+        dest_filename = src_filename
+        dest_path = os.path.join('output', 'img', 'popup', dest_filename)
+        shutil.copy(src_path, dest_path)
+        os.chmod(dest_path, 0644)
 
     return 0
 

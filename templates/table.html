@@ -1,5 +1,28 @@
 {% extends "base.html" %}
 
 {% block body %}
-<p>hello world</p>
+
+<table class="lookup-table">
+  <tr>
+    <th></th>
+    {% for ligand in ligands %}
+     <th>{{ ligand }}</th>
+    {% endfor %}
+  </tr>
+  {% for row in rc_address %}
+    <tr>
+      <th>{{ ligand_concs[loop.index0] }} ng/mL</th>
+    {% for address in row %}
+      {% include "table_cell.html" %}
+    {% endfor %}
+    </tr>
+  {% endfor %}
+</table>
+
+{% for row in rc_address %}
+  {% for address in row %}
+    {% include "popup.html" %}
+  {% endfor %}
+{% endfor %}
+
 {% endblock %}
