@@ -10,9 +10,25 @@ jQuery(document).ready(
             $popup.dialog({
                 resizable: false,
                 show: 'blind',
-                width: 'auto',
+                width: '725px',
                 height: 'auto',
                 position:  {my: 'left', at: 'right', of: this},
+                open: function (event, ui) {
+                    $('a.media-ondemand', event.target).each(function (index) {
+                        $link = $(this);
+                        $media = $link.next();
+                        $media.attr('src', $link.attr('href'));
+                        $link.remove();
+                        if ($media.prop('nodeName') == 'VIDEO') {
+                            $media.mediaelementplayer();
+                        }
+                    });
+                },
+                close: function (event, ui) {
+                    $('video', event.target).each(function (index) {
+                        this.pause();
+                    });
+                },
             });
             
         });

@@ -4,8 +4,12 @@
 
 /* hack around html5media-created display:block span so video player doesn't
 wrap onto the next line */
-.lookup-table-popup > span {
+/*.lookup-table-popup > span {
   display: inline-block !important;
+}*/
+
+.lookup-table-popup > .mejs-container {
+  display: inline-block;
 }
 
 /* Override some jquery theme items. */
