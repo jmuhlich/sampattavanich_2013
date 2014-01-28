@@ -37,8 +37,11 @@ font_timestamp = ImageFont.truetype(font_name, 24)
 font_scale = ImageFont.truetype(font_name, 18)
 
 # String templates for external commands.
-render_command_template = 'ffmpeg -i %s/%%03d.jpg -y ' \
-    '-vcodec libx264 -pix_fmt yuv420p -crf 21 -an %s'
+render_command_template = (
+    'ffmpeg -i %s/%%03d.jpg -y '
+    '-vcodec libx264 -profile:v main -level 3 -pix_fmt yuv420p -crf 21 '
+    '-an %s'
+    )
 faststart_command_template ='qt-faststart %s %s'
 
 
