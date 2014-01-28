@@ -7,26 +7,32 @@ jQuery(document).ready(
                 return c.indexOf('cell-') === 0;
             })[0];
             var $popup = $('.lookup-table-popup.' + cell_class);
+
             $popup.dialog({
                 resizable: false,
                 show: 'blind',
                 width: '725px',
                 height: 'auto',
-                position:  {my: 'left', at: 'right', of: this},
-                open: function (event, ui) {
-                    $('a.media-ondemand', event.target).each(function (index) {
-                        $link = $(this);
-                        $media = $link.next();
+                position:  {my: 'left top', at: 'right top', of: this},
+                open: function (event) {
+                    $('a.media-ondemand', event.target).each(function () {
+                        var $link = $(this);
+                        var $media = $link.next();
                         $media.attr('src', $link.attr('href'));
                         $link.remove();
-                        if ($media.prop('nodeName') == 'VIDEO') {
-                            $media.mediaelementplayer();
+                        if ($media.prop('nodeName') === 'VIDEO') {
+                            $media.mediaelementplayer({
+                                enablePluginSmoothing: true,
+                                pauseOtherPlayers: false,
+                                flashName: 'flashmediaelement-cdn.swf',
+                            });
                         }
                     });
                 },
-                close: function (event, ui) {
-                    $('video', event.target).each(function (index) {
+                close: function (event) {
+                    $('video', event.target).each(function () {
                         this.pause();
+                        this.player.setCurrentTime(0);
                     });
                 },
             });
