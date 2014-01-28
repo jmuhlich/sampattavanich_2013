@@ -84,6 +84,11 @@ def main(argv):
         out_file.write(content)
     shutil.copy('static/style.css', 'output')
     shutil.copy('static/main.js', 'output')
+    shutil.copy('static/jquery-ui-1.11.0-pre.js', 'output')
+    shutil.copy('static/jquery-ui-1.11.0-pre.min.js', 'output')
+    shutil.copy('static/jquery-ui-1.11.0-pre.min.css', 'output')
+    shutil.rmtree('output/images', ignore_errors=True)
+    shutil.copytree('static/images', 'output/images')
 
     if not args.minimal:
         makedirs_exist_ok('output/img/cell')
