@@ -4,36 +4,44 @@
 
 <table class="lookup-table">
   <tr>
-    <th></th>
+    <th rowspan="2" colspan="2"></th>
+    <th colspan="{{ ligands|length }}">Ligand name</th>
+  </tr>
+  <tr>
     {% for ligand in ligands %}
      <th>{{ ligand }}</th>
     {% endfor %}
   </tr>
-  {% for row in rc_address %}
+  {% for row in table %}
     <tr>
+      {% if loop.first %}
+      <th style="width: 3em;" rowspan="{{ ligand_concs|length + inhibitors|length }}">
+        <div style="transform: rotate(-90deg); left: -2.4em; position: absolute;">Ligand concentration<br/>( + inhibitor name )</div>
+      </th>
+      {% endif %}
       <th>{{ ligand_concs[loop.index0] }} ng/mL</th>
-    {% for address in row %}
+    {% for cell in row %}
       {% include "table_cell.html" %}
     {% endfor %}
     </tr>
   {% endfor %}
-  {% for row in rc_address_inhibitors %}
+  {% for row in table_inhibitors %}
     <tr>
-      <th>{{ ligand_concs[-1] }} ng/mL +  {{ inhibitors[loop.index0] }}</th>
-    {% for address in row %}
+      <th>{{ ligand_concs[-1] }} ng/mL<br/>+  {{ inhibitors[loop.index0] }}</th>
+    {% for cell in row %}
       {% include "table_cell.html" %}
     {% endfor %}
     </tr>
   {% endfor %}
 </table>
 
-{% for row in rc_address %}
-  {% for address in row %}
+{% for row in table %}
+  {% for cell in row %}
     {% include "popup.html" %}
   {% endfor %}
 {% endfor %}
-{% for row in rc_address_inhibitors %}
-  {% for address in row %}
+{% for row in table_inhibitors %}
+  {% for cell in row %}
     {% include "popup.html" %}
   {% endfor %}
 {% endfor %}

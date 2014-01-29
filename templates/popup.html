@@ -1,7 +1,12 @@
-<div class="lookup-table-popup cell-{{ address }}"
-     title="{{ address }}">
-  <a class="media-ondemand" href="img/popup/{{ address }}.png">Expanded time course</a>
+<div class="lookup-table-popup cell-{{ cell.rc_address }}"
+     title="
+            {{ cell.ligand }} @ {{ cell.ligand_conc }} ng/mL
+            {% if cell.inhibitor %}
+            + {{ cell.inhibitor }}
+            {% endif %}
+            ">
+  <a class="media-ondemand" href="img/popup/{{ cell.rc_address }}.png">Expanded time course</a>
   <img width="400" height="300" />
-  <a class="media-ondemand" href="movies/{{ address }}.mp4">Time-lapse movie of cells</a>
+  <a class="media-ondemand" href="movies/{{ cell.rc_address }}.mp4">Time-lapse movie of cells</a>
   <video width="300" height="300" type="video/mp4" controls loop />
 </div>
