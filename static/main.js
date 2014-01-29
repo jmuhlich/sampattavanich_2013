@@ -2,13 +2,14 @@ jQuery(document).ready(
     function ($) {
 
         var $cells = $('.lookup-table td');
+
         $cells.click(function() {
             // Find the td's identifying class (starts with "cell-") and use it
             // to look up the corresponding popup element.
             var cell_class = $.grep(this.className.split(/\s+/), function(c) {
                 return c.indexOf('cell-') === 0;
             })[0];
-            var $popup = $('.lookup-table-popup.' + cell_class);
+            var $popup = $('#popup-' + cell_class);
 
             $popup.dialog({
                 resizable: false,
@@ -71,5 +72,7 @@ jQuery(document).ready(
             
         });
 
+        // Quickly disable accessibility links.
+        $cells.children('a').removeAttr('href');
     }
 );
