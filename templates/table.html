@@ -15,8 +15,8 @@
   {% for row in table %}
     <tr>
       {% if loop.first %}
-      <th style="width: 3em;" rowspan="{{ ligand_concs|length + inhibitors|length }}">
-        <div style="transform: rotate(-90deg); left: -2.4em; position: absolute;">Ligand concentration<br/>( + inhibitor name )</div>
+      <th rowspan="{{ ligand_concs|length + inhibitors|length }}">
+        Ligand concentration<br/>( + inhibitor name )
       </th>
       {% endif %}
       <th>{{ ligand_concs[loop.index0] }} ng/mL</th>
