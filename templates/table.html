@@ -4,8 +4,8 @@
 
 <table class="lookup-table">
   <tr>
-    <th rowspan="2" colspan="2"></th>
-    <th colspan="{{ ligands|length }}">Ligand name</th>
+    <th rowspan="2" colspan="3"></th>
+    <th colspan="{{ ligands|length }}">Ligand</th>
   </tr>
   <tr>
     {% for ligand in ligands %}
@@ -15,19 +15,29 @@
   {% for row in table %}
     <tr>
       {% if loop.first %}
-      <th rowspan="{{ ligand_concs|length + inhibitors|length }}">
-        Ligand concentration<br/>( + inhibitor name )
+      <th rowspan="{{ ligand_concs|length }}">
+        Ligand concentration
       </th>
       {% endif %}
       <th>{{ ligand_concs[loop.index0] }} ng/mL</th>
+      <th></th>
     {% for cell in row %}
       {% include "table_cell.html" %}
     {% endfor %}
     </tr>
   {% endfor %}
+  <tr>
+    <td colspan="{{ ligands|length + 3 }}"><hr/></td>
+  </tr>
   {% for row in table_inhibitors %}
     <tr>
-      <th>{{ ligand_concs[-1] }} ng/mL<br/>+  {{ inhibitors[loop.index0] }}</th>
+      {% if loop.first %}
+      <th rowspan="{{ inhibitors|length }}">
+        Ligand concentration<br/> + inhibitor
+      </th>
+      {% endif %}
+      <th>{{ ligand_concs[-1] }} ng/mL</th>
+      <th style="width:4em;">+ {{ inhibitors[loop.index0] }}</th>
     {% for cell in row %}
       {% include "table_cell.html" %}
     {% endfor %}
